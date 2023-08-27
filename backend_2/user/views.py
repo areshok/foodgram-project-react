@@ -9,6 +9,9 @@ from rest_framework import status
 
 from .models import User
 
+from rest_framework import views
+
+
 @permission_classes([AllowAny])
 @api_view(['POST'])
 def get_token(request):
@@ -24,7 +27,12 @@ def get_token(request):
 
 
 
+class TokenDestroy(views.View):
 
+
+    def post(self, request):
+        pass
+    
 
 
 

@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from django.forms import ValidationError
+from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
+
 
 from .models import User
 
@@ -20,13 +23,37 @@ class TokenSerializers(serializers.ModelSerializer):
         password = data.get('password')
         print(email)
         print(password)
-        user = User.objects.get(email=email)
-
-        print('test password')
-        print(user.check_password(password))
-        if user.check_password(password):
+        user = get_object_or_404(User, email=email)
+        user_auth = authenticate(username=user.username, password=password)
+        print('user_auth')
+        print(user_auth)
+        print('serialis')
+        if user_auth is not None:
             return data
         else:
-            raise ValueError('ошибка валидатора')
+            raise ValidationError("invalid_credentials")
+
+       
+        #print('test password')
+        #print(user.check_password(password))
+
+
+
+    '''
+    def validate(self, attrs):
+        password = attrs.get("password")
+        email = attrs.get("email")
+        user = User.objects
+        self.user = authenticate(
+            request=self.context.get("request"), **params, password=password
+        )
+        if not self.user:
+            self.user = User.objects.filter(**params).first()
+            if self.user and not self.user.check_password(password):
+                self.fail("invalid_credentials")
+        if self.user and self.user.is_active:
+            return attrs
+        self.fail("invalid_credentials")
+    ''' 
 
         
