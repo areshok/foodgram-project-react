@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from rest_framework.decorators import action, api_view,  permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -12,7 +12,7 @@ from user.models import User
 
 from rest_framework import views
 
-from .serializers import TokenSerializers, UserSerializers
+from .serializers import TokenSerializers, UserSerializers, PasswordChangeSerialize
 
 @permission_classes([AllowAny])
 @api_view(['POST'])
@@ -45,11 +45,47 @@ class TokenDestroy(views.APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializers
-    permission_classes = [AllowAny,]
+    permission_classes = (AllowAny, )
 
+    @action(detail=False,
+        methods=('post',),
+        url_path='set_password',
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=PasswordChangeSerialize,
+    )
+    def set_password(self, request):
+        #print('hello')
+        
+        user = request.user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        check_password = user.check_password(serializer.data.get('current_password'))
+        #print(check_password)
+        #print(serializer.data.get('current_password'))
+        if check_password:
+            user.set_password(serializer.data.get('new_password'))
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        # прописать ошибку валидации старого пароля
 
-    def perform_create(self, serializer):
+    @action(
+        detail=False,
+        methods=('get', 'patch'),
+        url_path='me',
+        permission_classes=(IsAuthenticated, ),
+        serializer_class=UserSerializers
+    )
+    def me(self, request):
+        if request.method == 'GET':
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data,
+            partial=True)
+        serializer.is_valid(raise_exception=True)
         serializer.save()
-    
-
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

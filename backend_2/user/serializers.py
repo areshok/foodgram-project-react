@@ -59,6 +59,6 @@ class TokenSerializers(serializers.ModelSerializer):
             raise ValidationError("invalid_credentials")
 
   
-class UserPasswordChangeSerialize():
-    pass
-        
+class PasswordChangeSerialize(serializers.Serializer):
+    new_password = serializers.CharField()
+    current_password = serializers.CharField()

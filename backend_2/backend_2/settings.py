@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework_simplejwt',
     'user.apps.UserConfig',
+    'receipt.apps.ReceiptConfig',
     'api.apps.ApiConfig',
 ]
 
@@ -122,9 +123,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 REST_FRAMEWORK = {
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',)
-    }
+
+}
 
 
 '''
