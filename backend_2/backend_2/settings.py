@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework_simplejwt',
 
+    'data.apps.DataConfig',
     'user.apps.UserConfig',
     'receipt.apps.ReceiptConfig',
     'api.apps.ApiConfig',
@@ -149,3 +150,4 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('Bearer',),
 } 
 '''
+DATA_FOLDER = BASE_DIR.parent / 'data'
