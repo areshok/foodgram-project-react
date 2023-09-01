@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'rest_framework_simplejwt',
+
     'user.apps.UserConfig',
     'receipt.apps.ReceiptConfig',
     'api.apps.ApiConfig',
