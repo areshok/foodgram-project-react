@@ -9,10 +9,17 @@ class Tag(models.Model):
     color = models.CharField(max_length=7)
     slug = models.SlugField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
+
+
+    def __str__(self):
+        return self.name
 
 
 class Receipt(models.Model):
@@ -25,12 +32,26 @@ class Receipt(models.Model):
     text = models.TextField()
     cooking_time = models.PositiveIntegerField(validators=(MinValueValidator(1),), )
 
+    def __str__(self):
+        return self.name
+
 
 class TagReceipt(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.tag} - {self.receipt}'
+
+
 class IngredientReceipt(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
+    amount = models.PositiveIntegerField(validators=(MinValueValidator(1),), )
 
+    def __str__(self):
+        return f'{self.receipt} - {self.ingredient} '
+
+# favorit_recipt
+
+# Shopping list

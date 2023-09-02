@@ -3,10 +3,10 @@ from rest_framework import viewsets
 
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import TagSerializers, IngredientSerializers
+from .serializers import TagSerializers, IngredientSerializers, ReceiptSerializers
 
 
-from receipt.models import Tag, Ingredient
+from receipt.models import Tag, Ingredient, Receipt
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -22,7 +22,9 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
 
 
-
+class ReceiptViewSet(viewsets.ModelViewSet):
+    queryset = Receipt.objects.all()
+    serializer_class = ReceiptSerializers
 
 
 class Pusto(viewsets.ViewSet):

@@ -1,6 +1,10 @@
 from rest_framework import serializers
+from rest_framework.serializers import ReadOnlyField
 
-from receipt.models import Tag, Ingredient, Receipt
+
+from receipt.models import Tag, Ingredient, Receipt, IngredientReceipt
+
+from user.serializers import UserSerializers
 
 
 class TagSerializers(serializers.ModelSerializer):
@@ -12,16 +16,30 @@ class TagSerializers(serializers.ModelSerializer):
 class IngredientSerializers(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = ('id', 'name', 'measurement_unit', )
+
+
+class IngredientDetailSerializer(serializers.ModelSerializer):
+    id = ReadOnlyField(source='ingredient.id')    
+    name = ReadOnlyField(source='ingredient.name')
+    measurement_unit = ReadOnlyField(source='ingredient.measurement_unit')
+
+    class Meta:
+        model = IngredientReceipt
+        fields = ["id", "name", "measurement_unit", "amount"]
 
 
 class ReceiptSerializers(serializers.ModelSerializer):
+    tags = TagSerializers(read_only=True, many=True)
+    author = UserSerializers()
+    ingredients = IngredientDetailSerializer(source="ingredientreceipt_set", many=True)
+
     class Meta:
         model = Receipt
         fields = ('id',
-                  #'tag',
-                  #'author',
-                  #'ingredient',
+                  'tags',
+                  'author',
+                  'ingredients',
                   #
                   #
                   'name',
@@ -29,3 +47,9 @@ class ReceiptSerializers(serializers.ModelSerializer):
                   'text',
                   'cooking_time',
                   )
+        
+
+
+
+
+

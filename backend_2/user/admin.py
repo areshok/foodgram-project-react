@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Follow
+from .models import Subscription, User
 
-admin.site.register(Follow)
+admin.site.register(Subscription)
+admin.site.register(User)

@@ -4,61 +4,73 @@ from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 
 from django.contrib.auth.models import AnonymousUser 
-from .models import User, Follow
+from .models import User, Subscription
 
 import datetime as dt
 
-class FollowSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = Follow
-        fields = '__all__'
 
+# классы
+
+# ТОКЕН  ГОТОВ
+# -----------------------------------------------------------------------------------------------------
+class TokenSerializers(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+        user = get_object_or_404(User, email=email)
+        user_auth = authenticate(username=user.username, password=password)
+        if user_auth is not None:
+            return data
+        else:
+            raise ValidationError("invalid_credentials")
+# -----------------------------------------------------------------------------------------------------
+
+# USER 
+# -----------------------------------------------------------------------------------------------------
 class UserSerializers(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField(required=False, read_only=True,)
+    #is_subscribed = serializers.SerializerMethodField(required=False, read_only=True,)
     class Meta:
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed')
          
     def get_is_subscribed(self, obj):
+        pass
+        
         request = self.context.get('request', None)
-        print('request user')
-        print(request.user)
-        print(type(request.user))
-        print(request.user is AnonymousUser)
         if str(request.user) == 'AnonymousUser':
-            pass
+            return False
         else:
-            check_fol = Follow.objects.filter(user=request.user, following=obj).exists()
+            check_fol = Subscription.objects.filter(user=request.user, author=obj).exists()
             if check_fol:
                 return True
             else:
                 return False
-    
-    
+        
+# -----------------------------------------------------------------------------------------------------
 
-
-class TokenSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'password')
-
-    def validate(self, data):
-        #return super().validate(attrs)
-        email = data.get('email')
-        password = data.get('password')
-        #print(email)
-        #print(password)
-        user = get_object_or_404(User, email=email)
-        user_auth = authenticate(username=user.username, password=password)
-        #print('user_auth')
-        #print(user_auth)
-        #print('serialis')
-        if user_auth is not None:
-            return data
-        else:
-            raise ValidationError("invalid_credentials")
-
-  
+# Пароль
+# -----------------------------------------------------------------------------------------------------
 class PasswordChangeSerialize(serializers.Serializer):
     new_password = serializers.CharField()
     current_password = serializers.CharField()
+# -----------------------------------------------------------------------------------------------------
+
+# Подписки
+# -----------------------------------------------------------------------------------------------------
+class SubscriptionSerializers(serializers.ModelSerializer):
+    author = UserSerializers()
+    class Meta:
+        model = Subscription
+        fields = ('author',)
+# -----------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------
+class SubscriptionSerializers_1(serializers.Serializer):
+    author = UserSerializers()
+# -----------------------------------------------------------------------------------------------------
+
+        
+
