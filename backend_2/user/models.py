@@ -36,11 +36,19 @@ class Subscription(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='followings',
+        related_name='authors',
         help_text='На кого подписываются',
         verbose_name='Автор',
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='unique_subscription')
+        ]
+
+    def __str__(self):
+        return f'Пользователь {self.user} подписался на {self.author}'
 
 
 

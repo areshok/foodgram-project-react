@@ -61,10 +61,11 @@ class PasswordChangeSerialize(serializers.Serializer):
 # Подписки
 # -----------------------------------------------------------------------------------------------------
 class SubscriptionSerializers(serializers.ModelSerializer):
-    author = UserSerializers()
+    #author = serializers.StringRelatedField(many=True, read_only=True)
+    #author = UserSerializers()
     class Meta:
         model = Subscription
-        fields = ('author',)
+        fields = '__all__'
 # -----------------------------------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------------------------------
@@ -72,5 +73,8 @@ class SubscriptionSerializers_1(serializers.Serializer):
     author = UserSerializers()
 # -----------------------------------------------------------------------------------------------------
 
-        
+class UserSuSer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('authors',)  
 

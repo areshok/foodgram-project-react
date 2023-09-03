@@ -15,7 +15,8 @@ DATA_FILES = {
     'ingredient': 'ingredients.csv',
     'receipt': 'receipt.csv',
     'tagreceipt': 'tagreceipt.csv',
-    'ingredientreceipt': 'ingredientreceipt.csv'
+    'ingredientreceipt': 'ingredientreceipt.csv',
+    'users': 'users.csv'
 }
 
 class Command(BaseCommand):
@@ -24,9 +25,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print(settings.DATA_FOLDER)
         print(os.listdir(TEST_DATA_FOLDER))
+        user_admin()
+        users_load()
         load_tags()
         load_ingredient()
-        user_admin()
         load_receipt()
         load_tagreceipt()
         load_ingredientreceipt()
@@ -40,6 +42,14 @@ def user_admin():
     user.is_superuser=True
     user.is_staff=True
     user.save()
+
+
+def users_load():
+    with open(TEST_DATA_FOLDER / DATA_FILES['users'], encoding='utf-8') as file:
+        reader = csv.DictReader(file, delimiter=',')
+        for row in reader:
+            User.objects.create_user(**row)
+
 
 def load_tags():
     with open(TEST_DATA_FOLDER / DATA_FILES['tag'], encoding='utf-8') as file:
