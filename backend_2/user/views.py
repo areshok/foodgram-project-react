@@ -125,14 +125,35 @@ class UserViewSet(viewsets.ModelViewSet):
 # -----------------------------------------------------------------------------------------------------
 
 class FollowViewSet(viewsets.ModelViewSet):
-    serializer_class = SubscriptionSerializers
+    #serializer_class = UserSerializers
     permission_classes = (IsAuthenticated,)
-    pagination_class = LimitOffsetPagination
+    #pagination_class = LimitOffsetPagination
     #filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     #filterset_fields = ('user', 'following')
     #search_fields = ('subscription__username',)
 
     def get_queryset(self):
-
+        #user = self.request.user
+        #print(user)
+        #user_2 = User.objects.get(id=2)
+        #print(user_2)
+        #print(user.followers.all().values('author'))
         #return self.request.user.followers.all().prefetch_related('authors')
-        return Subscription.objects.all().prefetch_related('author')
+        #return Subscription.objects.all().prefetch_related('author')
+        #return User.objects.all().prefetch_related('author')
+        #return User.objects.select_related('')
+        
+        queryset = User.objects.filter(authors__user=self.request.user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+                serializer = UserSerializers(page, many=True)
+                custom_data = serializer.data
+                return Response(custom_data)
+        
+        #return UserSerializers(User.objects.get(id=1), many=True)
+        #User.objects.filter(followers_user=self.request.user)
+        #serialize = UserSerializers(User.objects.filter(authors__user=self.request.user), many=True)
+        #return UserSerializers(user.followers.all().values('author'), many=True)
+        #return Response(serialize.data)
+
+    # User.objects.filter(authors__user=user)
