@@ -8,6 +8,11 @@ from receipt.models import Tag, Ingredient, Receipt, TagReceipt, IngredientRecei
 from user.models import User
 
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 TEST_DATA_FOLDER = settings.DATA_FOLDER / 'test_data'
 
 DATA_FILES = {
@@ -34,11 +39,10 @@ class Command(BaseCommand):
         load_ingredientreceipt()
 
 def user_admin():
-    User.objects.all().delete()
     user = User.objects.create_user(
-        username='admin',
-        email='admin@admin.ru',
-        password='Areshok1980',)
+        username=os.getenv('ADMIN_USERNAME'),
+        email=os.getenv('ADMIN_EMAIL'),
+        password=os.getenv('ADMIN_PASSWORD'),)
     user.is_superuser=True
     user.is_staff=True
     user.save()

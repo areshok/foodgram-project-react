@@ -50,6 +50,19 @@ class ReceiptSerializers(serializers.ModelSerializer):
         
 
 
+class FavoriteReceiptSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
 
 
-
+class ShoppingListSerializers(serializers.ModelSerializer):
+    ingredients = IngredientDetailSerializer(source="ingredientreceipt_set", many=True)
+    class Meta:
+        model = Receipt
+        fields = ('ingredients',)

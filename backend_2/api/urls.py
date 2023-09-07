@@ -8,14 +8,11 @@ from rest_framework.routers import SimpleRouter
 from .views import TagViewSet, IngredientViewSet, ReceiptViewSet, Pusto
 
 
-from user.views import UserViewSet, TokenViewSet, FollowViewSet
+from user.views import UserViewSet, TokenViewSet
 
 
 router_api = SimpleRouter()
 router_api.register('auth/token', TokenViewSet, basename='token')
-
-router_api.register('follow', FollowViewSet, basename='follow')
-
 
 router_api.register('users', UserViewSet)
 router_api.register('tags', TagViewSet)

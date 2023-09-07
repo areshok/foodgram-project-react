@@ -16,7 +16,7 @@ from user.models import User, Subscription
 
 from rest_framework import views
 
-from .serializers import TokenSerializers, UserSerializers, PasswordChangeSerialize, SubscriptionSerializers, SubscriptionSerializers_1
+from .serializers import TokenSerializers, UserSerializers, PasswordChangeSerialize
 
 # классы и функции
 
@@ -98,21 +98,20 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=('get', 'post', 'del'),
+        methods=('get',),
         url_path='subscriptions',
         permission_classes=(IsAuthenticated, ),
-        #serializer_class=SubscriptionSerializers,
+        serializer_class=UserSerializers,
     )
     def subscriptions(self, request):
         if request.method == 'GET':
-            queryset = Subscription.objects.filter(user=request.user)
+            queryset = User.objects.filter(authors__user=self.request.user)
 
 
-            '''
             page = self.paginate_queryset(queryset)
 
             if page is not None:
-                serializer = SubscriptionSerializers_1(page, many=True)
+                serializer = UserSerializers(page, many=True)
                 custom_data = serializer.data
                 return Response(custom_data)
 
@@ -120,10 +119,32 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
             #pass
-            '''
+            
             return Response(queryset)
+        
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    @action(
+    detail=True,
+    methods=('post', 'delete')
+    )
+    def subscribe(self,request, pk):
+        author = User.objects.get(id=pk)
+        if request.method == 'POST':
+            Subscription.objects.create(user=request.user, author=author)
+        if request.method == 'DELETE':
+            Subscription.objects.get(user=request.user, author=author).delete()
+        return Response()
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 # -----------------------------------------------------------------------------------------------------
 
+
+
+
+
+
+
+"""
 class FollowViewSet(viewsets.ModelViewSet):
     #serializer_class = UserSerializers
     permission_classes = (IsAuthenticated,)
@@ -143,12 +164,32 @@ class FollowViewSet(viewsets.ModelViewSet):
         #return User.objects.all().prefetch_related('author')
         #return User.objects.select_related('')
         
+
+        '''
         queryset = User.objects.filter(authors__user=self.request.user)
         page = self.paginate_queryset(queryset)
         if page is not None:
                 serializer = UserSerializers(page, many=True)
                 custom_data = serializer.data
                 return Response(custom_data)
+        '''
+
+        '''
+            page = self.paginate_queryset(queryset)
+
+            if page is not None:
+                serializer = SubscriptionSerializers_1(page, many=True)
+                custom_data = serializer.data
+                return Response(custom_data)
+
+            #serializer = SubscriptionSerializers_1(page, many=True)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            #pass
+            '''
+
+
+
         
         #return UserSerializers(User.objects.get(id=1), many=True)
         #User.objects.filter(followers_user=self.request.user)
@@ -157,3 +198,6 @@ class FollowViewSet(viewsets.ModelViewSet):
         #return Response(serialize.data)
 
     # User.objects.filter(authors__user=user)
+"""
+    
+

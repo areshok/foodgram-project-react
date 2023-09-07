@@ -53,14 +53,13 @@ class IngredientReceipt(models.Model):
         return f'{self.receipt} - {self.ingredient} '
 
 # favorit_recipt
-'''
+
 class FavoritesReceipt(models.Model):
     receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE,)
-'''
+
 # Shopping list
-'''
+
 class ShoppingList(models.Model):
-    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE,)
-'''
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='receipts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='sp_users')
