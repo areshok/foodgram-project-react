@@ -26,7 +26,7 @@ class Receipt(models.Model):
     tags = models.ManyToManyField(Tag, through='TagReceipt')
     ingredients = models.ManyToManyField(Ingredient, through='IngredientReceipt')
 
-    author = models.ForeignKey(User, on_delete=models.CASCADE,)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='r_user')
     name = models.CharField(max_length=200)
     image = models.ImageField(upload_to='receipt/', null=True, blank=True)
     text = models.TextField()
@@ -45,8 +45,8 @@ class TagReceipt(models.Model):
 
 
 class IngredientReceipt(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='ir_ingridient')
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='ir_receipt')
     amount = models.PositiveIntegerField(validators=(MinValueValidator(1),), )
 
     def __str__(self):
@@ -61,5 +61,5 @@ class FavoritesReceipt(models.Model):
 # Shopping list
 
 class ShoppingList(models.Model):
-    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='receipts')
-    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='sp_users')
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='sl_receipt')
+    user = models.ForeignKey(User, on_delete=models.CASCADE,related_name='sl_user')

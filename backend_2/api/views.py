@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 
-from .serializers import TagSerializers, IngredientSerializers, ReceiptSerializers, FavoriteReceiptSerializers, ShoppingListSerializers
+from .serializers import TagSerializers, IngredientSerializers, ReceiptSerializers, FavoriteReceiptSerializers, ShoppingListSerializers, IngredientDetailSerializer
 
 
 from receipt.models import Tag, Ingredient, Receipt, FavoritesReceipt, ShoppingList
@@ -112,6 +112,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         #queryset = ShoppingList.objects.filter(user=request.user)
         # User.objects.filter(sp_users__user=self.request.user) 
+        '''
         queryset = User.objects.filter(sp_users__user=self.request.user)
 
         #User.objects.filter(sp_users__user=user)
@@ -123,6 +124,30 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             serializer = UserSerializers(page, many=True)
             custom_data = serializer.data
             return Response(custom_data)
+        
+        # from user.models import User
+        # from receipt.models import Tag, Ingredient, Receipt, FavoritesReceipt, ShoppingList
+        # user = User.objects.get(id=1)
+        #
+        '''
+        from django.http import JsonResponse
+
+
+        #sl = ShoppingList.objects.filter(user=user)
+        #sl = Receipt.objects.all()
+        #sl.receipts.filter(user=user)
+
+        user = User.objects.get(id=1)
+        data = Receipt.objects.filter(receipts__user=user)
+        Receipt.objects.filter(receipt__receipt_i__receipt_sp__user=user)
+        Receipt.objects.filter(receipt_sp__ingridient_i__owner_list=user)
+        Ingredient.objects.filter(receipt__receipt_i=1)
+        return JsonResponse(list(data), safe=False)
+        #IngredientSerializers(Receipt.objects.filter(receipts__user=user))
+        #IngredientDetailSerializer(Receipt.objects.filter(receipts__user=user))
+        # ShoppingList.objects.filter(receipts__)
+        # Thing.objects.filter(field__in=Another_Thing.object.filter())
+        #ShoppingList.objects.filter()
 
 
 
