@@ -16,6 +16,9 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
+    
+    class Meta:
+        verbose_name = 'Ингридиенты'
 
 
     def __str__(self):
@@ -24,7 +27,7 @@ class Ingredient(models.Model):
 
 class Receipt(models.Model):
     tags = models.ManyToManyField(Tag, through='TagReceipt')
-    ingredients = models.ManyToManyField(Ingredient, through='IngredientReceipt')
+    ingredients = models.ManyToManyField(Ingredient, through='IngredientReceipt', related_name='r_ingridient')
 
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='r_user')
     name = models.CharField(max_length=200)
