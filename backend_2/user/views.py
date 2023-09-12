@@ -1,37 +1,31 @@
-from django.shortcuts import render
-
-from rest_framework.decorators import action, api_view,  permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.authtoken.models import Token
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import viewsets
-
-
+from rest_framework import status, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from user.models import User, Subscription
+from user.models import Subscription, User
 
-from rest_framework import views
+from .serializers import (PasswordChangeSerialize, TokenSerializers,
+                          UserSerializers)
 
-from .serializers import TokenSerializers, UserSerializers, PasswordChangeSerialize
 
-# классы и функции
-
-# -----------------------------------------------------------------------------------------------------
 class TokenViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=['post',],
+        methods=['post', ],
         url_path='login',
         )
     def login(self, request):
         serializer = TokenSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, email=serializer.validated_data['email'])
+        user = get_object_or_404(
+            User,
+            email=serializer.validated_data['email']
+        )
         Token.objects.get_or_create(user=user)
         token = Token.objects.get(user=user).key
         message = {
@@ -41,16 +35,15 @@ class TokenViewSet(viewsets.ViewSet):
 
     @action(
         detail=False,
-        methods=['post',],
+        methods=['post', ],
         url_path='logout')
     def logout(self, request):
         user = request.user
         if Token.objects.filter(user=user).exists():
             Token.objects.filter(user=user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-# -----------------------------------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------------------------------
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializers
@@ -68,7 +61,9 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        check_password = user.check_password(serializer.data.get('current_password'))
+        check_password = user.check_password(
+            serializer.data.get('current_password')
+        )
         if check_password:
             user.set_password(serializer.data.get('new_password'))
             user.save()
@@ -107,97 +102,26 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             queryset = User.objects.filter(authors__user=self.request.user)
 
-
+            # from user.models import Subscription, User
+            # user = User.objects.get(id=1)
+            # User.objects.filter(authors__user=user)
             page = self.paginate_queryset(queryset)
 
             if page is not None:
                 serializer = UserSerializers(page, many=True)
-                custom_data = serializer.data
-                return Response(custom_data)
+                return self.get_paginated_response(serializer.data)
 
-            #serializer = SubscriptionSerializers_1(page, many=True)
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-            #pass
-            
-            return Response(queryset)
-        
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     @action(
-    detail=True,
-    methods=('post', 'delete')
+        detail=True,
+        methods=('post', 'delete')
     )
-    def subscribe(self,request, pk):
+    def subscribe(self, request, pk):
         author = User.objects.get(id=pk)
         if request.method == 'POST':
             Subscription.objects.create(user=request.user, author=author)
         if request.method == 'DELETE':
             Subscription.objects.get(user=request.user, author=author).delete()
         return Response()
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# -----------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-"""
-class FollowViewSet(viewsets.ModelViewSet):
-    #serializer_class = UserSerializers
-    permission_classes = (IsAuthenticated,)
-    #pagination_class = LimitOffsetPagination
-    #filter_backends = (filters.SearchFilter, DjangoFilterBackend)
-    #filterset_fields = ('user', 'following')
-    #search_fields = ('subscription__username',)
-
-    def get_queryset(self):
-        #user = self.request.user
-        #print(user)
-        #user_2 = User.objects.get(id=2)
-        #print(user_2)
-        #print(user.followers.all().values('author'))
-        #return self.request.user.followers.all().prefetch_related('authors')
-        #return Subscription.objects.all().prefetch_related('author')
-        #return User.objects.all().prefetch_related('author')
-        #return User.objects.select_related('')
-        
-
-        '''
-        queryset = User.objects.filter(authors__user=self.request.user)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-                serializer = UserSerializers(page, many=True)
-                custom_data = serializer.data
-                return Response(custom_data)
-        '''
-
-        '''
-            page = self.paginate_queryset(queryset)
-
-            if page is not None:
-                serializer = SubscriptionSerializers_1(page, many=True)
-                custom_data = serializer.data
-                return Response(custom_data)
-
-            #serializer = SubscriptionSerializers_1(page, many=True)
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-            #pass
-            '''
-
-
-
-        
-        #return UserSerializers(User.objects.get(id=1), many=True)
-        #User.objects.filter(followers_user=self.request.user)
-        #serialize = UserSerializers(User.objects.filter(authors__user=self.request.user), many=True)
-        #return UserSerializers(user.followers.all().values('author'), many=True)
-        #return Response(serialize.data)
-
-    # User.objects.filter(authors__user=user)
-"""
-    
-
