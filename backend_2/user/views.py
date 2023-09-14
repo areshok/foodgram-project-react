@@ -20,8 +20,11 @@ class TokenViewSet(viewsets.ViewSet):
         url_path='login',
         )
     def login(self, request):
+        print('test')
         serializer = TokenSerializers(data=request.data)
+        print('test2')
         serializer.is_valid(raise_exception=True)
+        print('test3')
         user = get_object_or_404(
             User,
             email=serializer.validated_data['email']

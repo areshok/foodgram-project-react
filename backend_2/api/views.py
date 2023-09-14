@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .serializers import (FavoriteReceiptSerializers, IngredientSerializers,
-                          ReceiptSerializers, TagSerializers)
+                          ReceiptSerializers, TagSerializers, ReceiptCreateSerializers)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -28,12 +28,18 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
-    serializer_class = ReceiptSerializers
+    #serializer_class = ReceiptSerializers
     permission_classes = (IsAuthenticated,)
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return ReceiptSerializers
+        else:
+            return ReceiptCreateSerializers
 
+    #def perform_create(self, serializer):
+        #serializer.save(author=self.request.user)
+    
 
     @action(
         detail=True,
