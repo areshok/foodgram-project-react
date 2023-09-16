@@ -3,6 +3,17 @@ from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
 from rest_framework import serializers
 from rest_framework.serializers import ReadOnlyField
 from user.serializers import UserSerializers
+import base64
+from django.core.files.base import ContentFile
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')  
+            ext = format.split('/')[-1]  
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        return super().to_internal_value(data)
 
 
 class TagSerializers(serializers.ModelSerializer):
@@ -55,8 +66,9 @@ class ReceiptSerializers(serializers.ModelSerializer):
     )
     author = UserSerializers(required=False)
     ingredients = IngredientDetailSerializer(
+        read_only=True,
+        many=True,
         source="ir_receipt",
-        many=True
     )
     is_favorited = serializers.SerializerMethodField(
         required=False,
@@ -66,6 +78,7 @@ class ReceiptSerializers(serializers.ModelSerializer):
         required=False,
         read_only=True,
     )
+    image = Base64ImageField()
 
     class Meta:
         model = Receipt
@@ -82,21 +95,48 @@ class ReceiptSerializers(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    '''
     def create(self, validated_data):
-        print(validated_data)
-
-        tags = validated_data.pop('tags')
-        print(tags)
-        receipt = Receipt.objects.create(*validated_data)
-        for tag in tags:
-            curent_tag, status = Tag.objects.get_or_create(tag)
-            TagReceipt.objects.create(tag=curent_tag, receipt=receipt)
+        receipt = Receipt.objects.create(**validated_data)
+        self.create_tag(receipt)
+        self.create_ingridients(receipt)
         return receipt
-    '''
 
+    def create_ingridients(self, receipt):
+        ingridients = self.initial_data.get('ingredients')
+        if ingridients is None:
+            raise serializers.ValidationError(
+                {'ingridients': 'нет интгридиентов'}
+            )
+        for element in ingridients:
+            ingridient = Ingredient.objects.get(id=element['id'])
+            amount = element['amount']
+            IngredientReceipt.objects.create(
+                receipt=receipt,
+                ingredient=ingridient,
+                amount=amount
+            )
 
-        ##return Receipt.objects.create(**validated_data)
+    def create_tag(self, receipt):
+        tags = self.initial_data.get('tags')
+        if tags is None:
+            raise serializers.ValidationError({'tags': 'нет тегов'})
+        tags = self.initial_data['tags']
+        for tag in tags:
+            curent_tag = Tag.objects.get(id=tag)
+            TagReceipt.objects.create(tag=curent_tag, receipt=receipt)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.image = validated_data.get('image', instance.image)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get(
+            'cooking_time', instance.cooking_time)
+        instance.save()
+        instance.t_receipt.all().delete()
+        self.create_tag(instance)
+        instance.ir_receipt.all().delete()
+        self.create_ingridients(instance)
+        return super().update(instance, validated_data)
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
@@ -112,73 +152,16 @@ class ReceiptSerializers(serializers.ModelSerializer):
                 user=request.user, receipt=obj
             ).exists())
 
-'''
-class IngridientRecetpCreate(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
 
-    class Meta:
-        model = IngredientReceipt
-        fields = ('id', 'amount')
-'''
-
-class IngridientRecetpCreate(serializers.Serializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
-
-
-        
-class ReceiptCreateSerializers(serializers.ModelSerializer):
-    author = UserSerializers(required=False)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
-    #ingredients = IngridientRecetpCreate(many=True, write_only=True)
-    ingredients = IngredientDetailSerializer(
-        source="ir_receipt",
-        many=True
-    )
+class ReceiptSubscribeSerializers(serializers.ModelSerializer):
     class Meta:
         model = Receipt
-        fields = [
-            'author',
-            'ingredients',
-            'tags',
-            'image',
+        fields = (
+            'id',
             'name',
-            'text',
+            'image',
             'cooking_time'
-        ]
-
-    def create(self, validated_data):
-        author = self.context['request'].user
-        print(validated_data)
-        tags = validated_data.pop('tags')
-        #ingredients = validated_data.pop('ingredients')
-
-        #print(ingredients[0])
-        #for ingridient in ingredients:
-            #print(ingridient['id'])
-
-        receipt = Receipt.objects.create(author=author, **validated_data)
-        for tag in tags:
-            TagReceipt.objects.create(tag=tag, receipt=receipt)
-        #for ingredient in ingredients:
-            #IngredientReceipt.objects.create(ingredient=ingredient['id'], receipt=receipt, amount=ingredient['amount'] )
-        return receipt
-
-    '''
-    def validate_ingredients(self, data):
-        ingridients = []
-        #print('validate_ingridients')
-        for el in data:
-            ingridient = el['id']
-            amount = el['amount']
-            ingridients.append((ingridient, amount))
-            #print(f'{ingridient}  {amount}')
-        return ingridients
-    '''
-
-
-
+        )
 
 class FavoriteReceiptSerializers(serializers.ModelSerializer):
     class Meta:

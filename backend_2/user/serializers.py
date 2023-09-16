@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from .models import Subscription, User
-
+from receipt.models import Receipt
 
 class TokenSerializers(serializers.Serializer):
     email = serializers.CharField()
@@ -39,7 +39,8 @@ class UserSerializers(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request', None)
+        request = self.context.get('request')
+        print(f'asdasdasd {request}')
         if str(request.user) == 'AnonymousUser':
             return False
         else:
@@ -54,8 +55,29 @@ class PasswordChangeSerialize(serializers.Serializer):
     current_password = serializers.CharField()
 
 
+
+class ReceiptSubscribeSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
+
 class SubscriptionSerializers(serializers.ModelSerializer):
+    #recipes = serializers.SerializerMethodField()
+
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
     recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.ReadOnlyField(source='author.r_user.count')
+    is_subscribed = serializers.SerializerMethodField()
+
 
     class Meta:
         model = User
@@ -70,6 +92,14 @@ class SubscriptionSerializers(serializers.ModelSerializer):
             'recipes_count'
         )
 
+    def get_is_subscribed(self, obj):
+        user = self.context.get('user')
+        return Subscription.objects.filter(
+            author=obj.author,
+            user=user
+        ).exists()
+
     def get_recipes(self, obj):
-        request = self.context.get('request')
-        pass
+        receipts = obj.author.r_user.all()
+        serializer = ReceiptSubscribeSerializers(receipts, many=True)
+        return serializer.data

@@ -9,22 +9,19 @@ from rest_framework.response import Response
 from user.models import Subscription, User
 
 from .serializers import (PasswordChangeSerialize, TokenSerializers,
-                          UserSerializers)
+                          UserSerializers, SubscriptionSerializers)
 
 
 class TokenViewSet(viewsets.ViewSet):
-
+    permission_classes = (AllowAny,)
     @action(
         detail=False,
         methods=['post', ],
         url_path='login',
         )
     def login(self, request):
-        print('test')
         serializer = TokenSerializers(data=request.data)
-        print('test2')
         serializer.is_valid(raise_exception=True)
-        print('test3')
         user = get_object_or_404(
             User,
             email=serializer.validated_data['email']
@@ -50,7 +47,7 @@ class TokenViewSet(viewsets.ViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializers
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticated, )
     pagination_class = LimitOffsetPagination
 
     @action(
@@ -99,24 +96,37 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=('get',),
         url_path='subscriptions',
         permission_classes=(IsAuthenticated, ),
-        serializer_class=UserSerializers,
+        #serializer_class=SubscriptionSerializers,
     )
     def subscriptions(self, request):
         if request.method == 'GET':
-            queryset = User.objects.filter(authors__user=self.request.user)
+            user = request.user
+            queryset = user.followers.all()
+            #queryset = User.objects.filter(authors__user=self.request.user)
+            page = self.paginate_queryset(queryset)
+            print('serialize')
+            serializer = SubscriptionSerializers(
+                page,
+                many=True,
+                context={'user': user}
+            )
+            print('return')
+            return self.get_paginated_response(serializer.data)
 
-            # from user.models import Subscription, User
-            # user = User.objects.get(id=1)
-            # User.objects.filter(authors__user=user)
+            '''
+            queryset = User.objects.filter(authors__user=self.request.user)
+            print('terst')
             page = self.paginate_queryset(queryset)
 
             if page is not None:
-                serializer = UserSerializers(page, many=True)
+                print('fsdfsdfsdfsdf')
+                serializer = SubscriptionSerializers(page, many=True)
+                print('test 2')
                 return self.get_paginated_response(serializer.data)
-
+            print('test 3')
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-
+            '''
     @action(
         detail=True,
         methods=('post', 'delete')

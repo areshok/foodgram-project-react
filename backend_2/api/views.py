@@ -8,8 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .serializers import (FavoriteReceiptSerializers, IngredientSerializers,
-                          ReceiptSerializers, TagSerializers, ReceiptCreateSerializers)
+                          ReceiptSerializers, TagSerializers)
 
+from .permissions import IsAuthorOrRedOnly
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
@@ -23,23 +24,17 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializers
     permission_classes = (IsAuthenticated, )
+    http_method_names = ('get',)
     pagination_class = None
 
 
 class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
-    #serializer_class = ReceiptSerializers
-    permission_classes = (IsAuthenticated,)
+    serializer_class = ReceiptSerializers
+    permission_classes = (IsAuthorOrRedOnly,)
 
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return ReceiptSerializers
-        else:
-            return ReceiptCreateSerializers
-
-    #def perform_create(self, serializer):
-        #serializer.save(author=self.request.user)
-    
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     @action(
         detail=True,

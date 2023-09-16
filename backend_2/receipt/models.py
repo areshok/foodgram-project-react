@@ -72,7 +72,7 @@ class Receipt(models.Model):
 
 class TagReceipt(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE,related_name='t_receipt')
 
     def __str__(self):
         return f'{self.tag} - {self.receipt}'
