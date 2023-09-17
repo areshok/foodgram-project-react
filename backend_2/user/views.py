@@ -132,9 +132,12 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete')
     )
     def subscribe(self, request, pk):
+        user = request.user
         author = User.objects.get(id=pk)
         if request.method == 'POST':
-            Subscription.objects.create(user=request.user, author=author)
+            queryset = Subscription.objects.create(user=request.user, author=author)
+            serialize = SubscriptionSerializers(queryset, context={'user': user})
+            return Response(serialize.data)
         if request.method == 'DELETE':
             Subscription.objects.get(user=request.user, author=author).delete()
         return Response()
