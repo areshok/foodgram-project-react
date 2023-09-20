@@ -3,7 +3,7 @@ name: Main Foodgram workflow
 on:
   push:
     branches:
-      - main
+      - master
 
 
 jobs:
@@ -22,7 +22,6 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-
     steps:
     - name: Check out code
       uses: actions/checkout@v3
@@ -31,14 +30,13 @@ jobs:
       with:
         python-version: 3.9
 
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip 
         pip install flake8==6.0.0 flake8-isort==6.0.0
         pip install -r ./backend/requirements.txt
 
-    - name: Test with flake8 and django tests
+    - name: Test with flake8
       env:
         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
@@ -63,5 +61,4 @@ jobs:
 
 
 
-        
-             
+

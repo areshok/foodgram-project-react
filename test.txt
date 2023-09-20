@@ -1,0 +1,27 @@
+docker buildx build --platform=linux/amd64 -t areshok/foodgram_backend .
+
+
+
+docker buildx build --platform=linux/amd64 -t areshok/foodgram_frontend .
+
+docker buildx build --platform=linux/amd64 -t areshok/foodgram_gateway .
+
+
+
+docker compose -f docker-compose.production.yml up 
+
+docker exec  foodgram-project-react-nginx-1 cp -rT /static_frontend/build/ /usr/share/nginx/html/
+docker exec foodgram-project-react-backend-1 python manage.py data
+
+
+
+
+docker push areshok/foodgram_frontend
+docker push areshok/foodgram_backend
+docker push areshok/foodgram_gateway 
+
+
+
+
+
+
