@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
 STATIC_URL = '/django_static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/django_media/'
 MEDIA_ROOT = '/backend_static/media'
 
 DATA_FOLDER = BASE_DIR / 'data'
