@@ -1,6 +1,5 @@
 version: '3.3'
 
-
 volumes:
   static:
   bd:
@@ -10,40 +9,31 @@ services:
 
   db:
     image: postgres:13
-    env_file: ../.env
+    env_file: .env
     volumes:
       - bd:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    env_file: ../.env
+    image: areshok/foodgram_backend
+    env_file: .env
     volumes:
       - static:/backend_static/
-      - ../data:/app/data/
+      - ./data/:/app/data/
     depends_on:
       - db
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: areshok/foodgram_frontend
     volumes:
       - static_frontend:/app/result_build/
 
   nginx:
-    build:
-      context: ../nginx
-      dockerfile: Dockerfile
-    #command: cp -rT /static_frontend/build/ /usr/share/nginx/html/
+    image: areshok/foodgram_gateway
     ports:
       - "80:80"
     volumes:
       - static:/static/
       - static_frontend:/static_frontend/
-
-
     depends_on: 
       - backend
       - frontend
