@@ -30,7 +30,7 @@ services:
   nginx:
     image: areshok/foodgram_gateway
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - static:/static/
       - static_frontend:/static_frontend/
