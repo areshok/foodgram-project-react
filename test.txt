@@ -13,8 +13,12 @@ docker compose -f docker-compose.production.yml up
 docker exec  foodgram-project-react-nginx-1 cp -rT /static_frontend/build/ /usr/share/nginx/html/
 docker exec foodgram-project-react-backend-1 python manage.py data
 
+foodgram-nginx-1
+docker exec  foodgram-nginx-1 cp -rT /static_frontend/build/ /usr/share/nginx/html/
 
 
+docker exec foodgram-backend-1 python manage.py data
+foodgram-backend-1
 
 docker push areshok/foodgram_frontend
 docker push areshok/foodgram_backend
