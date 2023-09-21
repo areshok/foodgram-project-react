@@ -1,0 +1,3 @@
+url: foodgram-turlapov.ddns.net
+login: admin
+pass: Areshok1980
