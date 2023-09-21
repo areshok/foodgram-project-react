@@ -33,3 +33,5 @@ sudo docker compose -f docker-compose.production.yml up -d
 sudo docker exec  foodgram-nginx-1 cp -rT /static_frontend/build/ /usr/share/nginx/html/
 
 
+sudo docker exec foodgram-backend-1 python manage.py data
+sudo docker exec foodgram-backend-1 python manage.py recipes_diplom

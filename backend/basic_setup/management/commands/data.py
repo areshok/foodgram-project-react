@@ -10,7 +10,7 @@ from user.models import User
 
 load_dotenv()
 
-FOLDER_DATA = settings.BASE_DIR
+FOLDER_DATA = settings.DATA_FOLDER
 
 FILES = {
     'ingredients': FOLDER_DATA / 'ingredients.csv',

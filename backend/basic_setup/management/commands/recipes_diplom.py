@@ -12,7 +12,7 @@ load_dotenv()
 
 # settings.BASE_DIR.parent
 
-FOLDER_DATA = settings.BASE_DIR
+FOLDER_DATA = settings.DATA_FOLDER
 
 FILES = {
     'users': FOLDER_DATA / 'users.csv',
