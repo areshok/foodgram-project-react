@@ -1,5 +1,4 @@
 import csv
-import sys
 from random import choice, randint
 
 from django.conf import settings
@@ -13,19 +12,11 @@ load_dotenv()
 
 # settings.BASE_DIR.parent
 
-FOLDER_DATA = settings.DATA_FOLDER
-
-
-def is_venv():
-    if hasattr(sys, 'real_prefix'):
-        return settings.DATA_FOLDER
-    else:
-        return settings.BASE_DIR.parent / 'data'
-
+FOLDER_DATA = settings.BASE_DIR
 
 FILES = {
-    'users': is_venv() / 'users.csv',
-    'food': is_venv() / 'name_food.csv',
+    'users': FOLDER_DATA / 'users.csv',
+    'food': FOLDER_DATA / 'name_food.csv',
 }
 
 

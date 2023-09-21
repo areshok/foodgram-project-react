@@ -1,7 +1,6 @@
 import csv
 import os
 import subprocess
-import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -11,19 +10,11 @@ from user.models import User
 
 load_dotenv()
 
-FOLDER_DATA = settings.DATA_FOLDER
-
-
-def is_venv():
-    if hasattr(sys, 'real_prefix'):
-        return settings.DATA_FOLDER
-    else:
-        return settings.BASE_DIR.parent / 'data'
-
+FOLDER_DATA = settings.BASE_DIR
 
 FILES = {
-    'ingredients': is_venv() / 'ingredients.csv',
-    'tags': is_venv() / 'tags.csv',
+    'ingredients': FOLDER_DATA / 'ingredients.csv',
+    'tags': FOLDER_DATA / 'tags.csv',
 }
 
 
