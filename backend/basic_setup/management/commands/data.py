@@ -1,6 +1,7 @@
 import csv
 import os
 import subprocess
+import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -10,10 +11,19 @@ from user.models import User
 
 load_dotenv()
 
+FOLDER_DATA = settings.DATA_FOLDER
+
+
+def is_venv():
+    if hasattr(sys, 'real_prefix'):
+        return settings.DATA_FOLDER
+    else:
+        return settings.BASE_DIR.parent / 'data'
+
 
 FILES = {
-    'ingredients': settings.DATA_FOLDER / 'ingredients.csv',
-    'tags': settings.DATA_FOLDER / 'tags.csv',
+    'ingredients': is_venv() / 'ingredients.csv',
+    'tags': is_venv() / 'tags.csv',
 }
 
 
@@ -58,7 +68,7 @@ def create_superuser():
 def create_ingridients():
     print('ingredients')
     with open(
-        settings.DATA_FOLDER / 'ingredients.csv',
+        FILES['ingredients'],
         encoding='utf-8'
     ) as file:
         reader = csv.reader(file, delimiter=',')

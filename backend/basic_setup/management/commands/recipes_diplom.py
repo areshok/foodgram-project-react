@@ -1,4 +1,5 @@
 import csv
+import sys
 from random import choice, randint
 
 from django.conf import settings
@@ -11,9 +12,20 @@ from user.models import User
 load_dotenv()
 
 # settings.BASE_DIR.parent
+
+FOLDER_DATA = settings.DATA_FOLDER
+
+
+def is_venv():
+    if hasattr(sys, 'real_prefix'):
+        return settings.DATA_FOLDER
+    else:
+        return settings.BASE_DIR.parent / 'data'
+
+
 FILES = {
-    'users': settings.DATA_FOLDER / 'users.csv',
-    'food': settings.DATA_FOLDER / 'name_food.csv',
+    'users': is_venv() / 'users.csv',
+    'food': is_venv() / 'name_food.csv',
 }
 
 
@@ -35,14 +47,16 @@ def create_test_user():
 
 def create_test_recipes():
     name_food = []
+
     with open(FILES['food'], encoding='utf-8') as file:
         reader = csv.reader(file, delimiter=',')
         for row in reader:
             name_food.append(row[0])
 
     for _ in range(1, 50):
-        id_tag = randint(1, 5)
-        id_user = randint(1, 5)
+        id_tag = randint(1, 4)
+        id_user = randint(1, 4)
+        cooking_time = randint(1, 200)
         name_receipt = choice(name_food)
         user = User.objects.get(id=id_user)
         tag = Tag.objects.get(id=id_tag)
@@ -50,6 +64,7 @@ def create_test_recipes():
             author=user,
             name=name_receipt,
             text=name_receipt,
+            cooking_time=cooking_time,
         )
         TagReceipt.objects.create(
             tag=tag,
