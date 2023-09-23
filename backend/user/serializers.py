@@ -18,8 +18,7 @@ class TokenSerializers(serializers.Serializer):
         user_auth = authenticate(username=user.username, password=password)
         if user_auth is not None:
             return data
-        else:
-            raise ValidationError("Неверные данные")
+        raise ValidationError("Неверные данные")
 
 
 class UserSerializers(serializers.ModelSerializer):
@@ -43,7 +42,6 @@ class UserSerializers(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        print(f'asdasdasd {request}')
         if str(request.user) == 'AnonymousUser':
             return False
         else:
@@ -60,7 +58,6 @@ class UserSerializers(serializers.ModelSerializer):
             last_name=validate_data['last_name'],
             password=validate_data['password'],
         )
-        user.save()
         return user
 
 

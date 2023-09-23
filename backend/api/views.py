@@ -8,9 +8,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .filters import IngredientFilter, ReceiptFilter
+from .functions import favorit_or_shopping_cart
 from .permissions import IsAuthorOrRedOnly
-from .serializers import (FavoriteReceiptSerializers, IngredientSerializers,
-                          ReceiptSerializers, TagSerializers)
+from .serializers import (IngredientSerializers, ReceiptSerializers,
+                          TagSerializers)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -45,38 +46,12 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete'),
     )
     def favorite(self, request, pk):
-        receipt = Receipt.objects.get(id=pk)
-        favorite_recipe = FavoritesReceipt.objects.filter(
-            user=request.user,
-            receipt=receipt
-        ).exists()
-
-        if request.method == 'POST':
-            if favorite_recipe:
-                message = {
-                    'errors': 'Рецепт уже есть в избранном'
-                }
-                return Response(message, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                FavoritesReceipt.objects.create(
-                    user=request.user,
-                    receipt=receipt
-                )
-                serialize = FavoriteReceiptSerializers(receipt)
-                return Response(serialize.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            if favorite_recipe:
-                FavoritesReceipt.objects.get(
-                    user=request.user,
-                    receipt=receipt
-                ).delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-            message = {
-                'errors': 'Рецепта нет в избранном'
-            }
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        favorit_or_shopping_cart(
+            request,
+            pk,
+            FavoritesReceipt,
+            'favorite',
+        )
 
     @action(
         detail=True,
@@ -84,42 +59,12 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete')
     )
     def shopping_cart(self, request, pk):
-        receipt = Receipt.objects.get(id=pk)
-        message = {
-            'post': {'errors': 'Рецепт уже добавлен в список  покупок'},
-            'del': {'errors': 'Рецепта нет в списке покупок'},
-        }
-        receip_in_sl = ShoppingList.objects.filter(
-            receipt=receipt,
-            user=self.request.user
-        ).exists()
-
-        if request.method == 'POST':
-            if receip_in_sl:
-                return Response(
-                    message['post'],
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                ShoppingList.objects.create(
-                    receipt=receipt,
-                    user=self.request.user
-                )
-                serialize = FavoriteReceiptSerializers(receipt)
-                return Response(serialize.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            if receip_in_sl:
-                ShoppingList.objects.get(
-                    receipt=receipt,
-                    user=self.request.user
-                ).delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                return Response(
-                    message['del'],
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+        favorit_or_shopping_cart(
+            request,
+            pk,
+            ShoppingList,
+            'shopping_cart',
+        )
 
     @action(
         detail=False,
@@ -132,7 +77,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Список покупок пуст'},
                             status=status.HTTP_204_NO_CONTENT)
 
-        sp = list(
+        shoping_list = list(
             IngredientReceipt.objects.filter(
                 receipt__sl_receipt__user=user).values(
                 'ingredient__name',
@@ -143,7 +88,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         data += 'Список покупок \n'
         data += 'Ингридиент масса единица измерения \n'
 
-        for n, el in enumerate(sp):
+        for n, el in enumerate(shoping_list):
             name = el['ingredient__name']
             msu = el['ingredient__measurement_unit']
             amount = el['ingredient_amount']
