@@ -110,7 +110,7 @@ class TagReceipt(models.Model):
         verbose_name_plural = 'Теги рецептев'
         constraints = [
             models.UniqueConstraint(
-                fields=['tag', 'receipt'], name='unique_subscription')
+                fields=['tag', 'receipt'], name='unique_tagreceipt')
         ]
 
     def __str__(self):
@@ -138,6 +138,12 @@ class IngredientReceipt(models.Model):
     class Meta:
         verbose_name = 'Игридиенты рецептев'
         verbose_name_plural = 'Игридиенты рецептев'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'receipt'],
+                name='unique_ingredientreceipt',
+            )
+        ]
 
     def __str__(self):
         return f'{self.receipt} - {self.ingredient} '
@@ -162,7 +168,7 @@ class FavoritesReceipt(models.Model):
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
             models.UniqueConstraint(
-                fields=['receipt', 'user'], name='unique_subscription')
+                fields=['receipt', 'user'], name='unique_favoritesreceipt')
         ]
 
 
@@ -185,5 +191,5 @@ class ShoppingList(models.Model):
         verbose_name_plural = 'Список покупок'
         constraints = [
             models.UniqueConstraint(
-                fields=['receipt', 'user'], name='unique_subscription')
+                fields=['receipt', 'user'], name='unique_shoppinglist')
         ]
