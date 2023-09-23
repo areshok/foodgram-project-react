@@ -46,7 +46,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete'),
     )
     def favorite(self, request, pk):
-        favorit_or_shopping_cart(
+        return favorit_or_shopping_cart(
             request,
             pk,
             FavoritesReceipt,
@@ -59,7 +59,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete')
     )
     def shopping_cart(self, request, pk):
-        favorit_or_shopping_cart(
+        return favorit_or_shopping_cart(
             request,
             pk,
             ShoppingList,
