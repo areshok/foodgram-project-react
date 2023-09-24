@@ -134,6 +134,7 @@ class ReceiptSerializers(serializers.ModelSerializer):
 
     def create_tag(self, receipt):
         tags = self.validated_data.get('tags')
+        print(tags)
         objs = []
         for tag in tags:
             curent_tag = Tag.objects.get(id=tag)
