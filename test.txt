@@ -37,3 +37,12 @@ sudo docker exec foodgram-backend-1 python manage.py data
 
 sudo docker exec foodgram-backend-1 python manage.py data
  
+
+
+ sudo docker rmi -f $(sudo docker images -aq)
+
+
+ df -h
+
+
+ 
