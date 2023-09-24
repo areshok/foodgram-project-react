@@ -1,20 +1,10 @@
-import base64
-
-from django.core.files.base import ContentFile
 from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
                             Receipt, ShoppingList, Tag, TagReceipt)
 from rest_framework import serializers
 from rest_framework.serializers import ReadOnlyField
 from user.serializers import UserSerializers
 
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
+from .fields import Base64ImageField
 
 
 class TagSerializers(serializers.ModelSerializer):
@@ -102,37 +92,56 @@ class ReceiptSerializers(serializers.ModelSerializer):
         self.create_ingridients(receipt)
         return receipt
 
-    def create_ingridients(self, receipt):
-        ingridients = self.initial_data.get('ingredients')
-        if ingridients is None:
-            raise serializers.ValidationError(
-                {'ingridients': 'нет интгридиентов'}
-            )
+    def validate_ingredients(self, value):
+        if value is None:
+            raise serializers.ValidationError('нет интгридиентов')
+        if len(value) == 0:
+            raise serializers.ValidationError('нет интгридиентов')
+        for element in value:
+            if type(element['id']) is not int:
+                raise serializers.ValidationError('Не целочисленное число')
+            if type(element['amount']) is not int:
+                raise serializers.ValidationError('Не целочисленное число')
+        id_list = []
+        for element in value:
+            id_list.append(element['id'])
+        if len(id_list) > len(set(id_list)):
+            raise serializers.ValidationError('Содержит дубликаты')
+        return value
+
+    def validate_tags(self, value):
+        if value is None:
+            raise serializers.ValidationError('нет тегов')
+        for element in value:
+            if type(element) is not int:
+                raise serializers.ValidationError('Не целочисленное число')
+        if len(value) > len(set(value)):
+            raise serializers.ValidationError('Содержит дубликаты')
+        return value
+
+    def create_ingredients(self, receipt):
+        ingridients = self.validated_data.get('ingredients')
+        objs = []
         for element in ingridients:
-            ingridient = Ingredient.objects.get(id=element['id'])
+            ingredient = Ingredient.objects.get(id=element['id'])
             amount = element['amount']
-            IngredientReceipt.objects.create(
+            objs.append(IngredientReceipt(
                 receipt=receipt,
-                ingredient=ingridient,
-                amount=amount
+                ingredient=ingredient,
+                amount=amount)
             )
+        IngredientReceipt.objects.bulk_create(objs)
 
     def create_tag(self, receipt):
-        tags = self.initial_data.get('tags')
-        if tags is None:
-            raise serializers.ValidationError({'tags': 'нет тегов'})
-        tags = self.initial_data['tags']
+        tags = self.validated_data.get('tags')
+        objs = []
         for tag in tags:
             curent_tag = Tag.objects.get(id=tag)
-            TagReceipt.objects.create(tag=curent_tag, receipt=receipt)
+            objs.append(TagReceipt(tag=curent_tag, receipt=receipt))
+        TagReceipt.objects.bulk_create(objs)
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.image = validated_data.get('image', instance.image)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time)
-        instance.save()
+        super().update(instance, validated_data)
         instance.t_receipt.all().delete()
         self.create_tag(instance)
         instance.ir_receipt.all().delete()
@@ -141,23 +150,21 @@ class ReceiptSerializers(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if str(request.user) == 'AnonymousUser':
-            return False
-        else:
+        if request.user.is_authenticated:
             return (
                 FavoritesReceipt.objects.filter(
                     user=request.user, receipt=obj
                 ).exists())
+        return False
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        if str(request.user) == 'AnonymousUser':
-            return False
-        else:
+        if request.user.is_authenticated:
             return (
                 ShoppingList.objects.filter(
                     user=request.user, receipt=obj
                 ).exists())
+        return False
 
 
 class ReceiptSubscribeSerializers(serializers.ModelSerializer):

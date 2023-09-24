@@ -51,14 +51,13 @@ class UserSerializers(serializers.ModelSerializer):
                 ).exists())
 
     def create(self, validate_data):
-        user = User.objects.create_user(
+        return User.objects.create_user(
             username=validate_data['username'],
             email=validate_data['email'],
             first_name=validate_data['first_name'],
             last_name=validate_data['last_name'],
             password=validate_data['password'],
         )
-        return user
 
 
 class PasswordChangeSerialize(serializers.Serializer):

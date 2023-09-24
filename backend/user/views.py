@@ -96,18 +96,17 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated, ),
     )
     def subscriptions(self, request):
-        if request.method == 'GET':
-            user = request.user
-            queryset = user.followers.all()
-            page = self.paginate_queryset(queryset)
-            print('serialize')
-            serializer = SubscriptionSerializers(
-                page,
-                many=True,
-                context={'user': user}
-            )
-            print('return')
-            return self.get_paginated_response(serializer.data)
+        user = request.user
+        queryset = user.followers.all()
+        page = self.paginate_queryset(queryset)
+        print('serialize')
+        serializer = SubscriptionSerializers(
+            page,
+            many=True,
+            context={'user': user}
+        )
+        print('return')
+        return self.get_paginated_response(serializer.data)
 
     @action(
         detail=True,
@@ -142,15 +141,14 @@ class UserViewSet(viewsets.ModelViewSet):
                     context={'user': user}
                 )
                 return Response(serialize.data)
-        if request.method == 'DELETE':
-            if check:
-                Subscription.objects.get(
-                    user=request.user,
-                    author=author
-                ).delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                return Response(
-                    message['del'],
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+        if check:
+            Subscription.objects.get(
+                user=request.user,
+                author=author
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                message['del'],
+                status=status.HTTP_400_BAD_REQUEST
+            )
