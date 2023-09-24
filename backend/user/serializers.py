@@ -42,13 +42,12 @@ class UserSerializers(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if str(request.user) == 'AnonymousUser':
-            return False
-        else:
+        if request.user.is_authenticated:
             return (
                 Subscription.objects.filter(
                     user=request.user, author=obj
                 ).exists())
+        return False
 
     def create(self, validate_data):
         return User.objects.create_user(
@@ -61,8 +60,12 @@ class UserSerializers(serializers.ModelSerializer):
 
 
 class PasswordChangeSerialize(serializers.Serializer):
-    new_password = serializers.CharField()
-    current_password = serializers.CharField()
+    new_password = serializers.CharField(
+        max_length=150,
+    )
+    current_password = serializers.CharField(
+        max_length=150,
+    )
 
 
 class ReceiptSubscribeSerializers(serializers.ModelSerializer):

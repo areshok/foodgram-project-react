@@ -39,8 +39,7 @@ class TokenViewSet(viewsets.ViewSet):
         url_path='logout')
     def logout(self, request):
         user = request.user
-        if Token.objects.filter(user=user).exists():
-            Token.objects.filter(user=user).delete()
+        Token.objects.filter(user=user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -61,14 +60,13 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         check_password = user.check_password(
-            serializer.data.get('current_password')
+            serializer.validated_data.get('current_password')
         )
         if check_password:
-            user.set_password(serializer.data.get('new_password'))
+            user.set_password(serializer.validated_data.get('new_password'))
             user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=False,
@@ -99,13 +97,11 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         queryset = user.followers.all()
         page = self.paginate_queryset(queryset)
-        print('serialize')
         serializer = SubscriptionSerializers(
             page,
             many=True,
             context={'user': user}
         )
-        print('return')
         return self.get_paginated_response(serializer.data)
 
     @action(
@@ -131,24 +127,22 @@ class UserViewSet(viewsets.ModelViewSet):
                     message['post'],
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            else:
-                queryset = Subscription.objects.create(
-                    user=request.user,
-                    author=author
-                )
-                serialize = SubscriptionSerializers(
-                    queryset,
-                    context={'user': user}
-                )
-                return Response(serialize.data)
+            queryset = Subscription.objects.create(
+                user=request.user,
+                author=author
+            )
+            serialize = SubscriptionSerializers(
+                queryset,
+                context={'user': user}
+            )
+            return Response(serialize.data)
         if check:
             Subscription.objects.get(
                 user=request.user,
                 author=author
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(
-                message['del'],
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            message['del'],
+            status=status.HTTP_400_BAD_REQUEST
+        )

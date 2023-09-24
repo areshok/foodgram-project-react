@@ -2,6 +2,10 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from user.models import User
 
+# related_name в полях моделях образуется из
+# сокращенного название модели(таблицы) где находится поле
+# и название основной модели(таблицы)
+
 
 class Tag(models.Model):
     name = models.CharField(
