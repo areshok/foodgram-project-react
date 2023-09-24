@@ -1,6 +1,7 @@
 from django_filters.rest_framework import FilterSet, filters
-from receipt.models import Ingredient, Receipt, Tag
 from rest_framework.filters import SearchFilter
+
+from receipt.models import Ingredient, Receipt, Tag
 
 
 class IngredientFilter(SearchFilter):
