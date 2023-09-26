@@ -86,7 +86,9 @@ class SubscriptionSerializers(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.ReadOnlyField(source='author.r_user.count')
+    recipes_count = serializers.ReadOnlyField(
+        source='author.receipt_user.count'
+    )
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -110,6 +112,6 @@ class SubscriptionSerializers(serializers.ModelSerializer):
         ).exists()
 
     def get_recipes(self, obj):
-        receipts = obj.author.r_user.all()
+        receipts = obj.author.receipt_user.all()
         serializer = ReceiptSubscribeSerializers(receipts, many=True)
         return serializer.data
