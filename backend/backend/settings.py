@@ -65,7 +65,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-'''
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -129,7 +129,8 @@ STATIC_URL = '/django_static/'
 STATIC_ROOT = BASE_DIR / 'collected_static'
 
 MEDIA_URL = '/django_media/'
-MEDIA_ROOT = '/backend_static/media'
+#MEDIA_ROOT = '/backend_static/media'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DATA_FOLDER = BASE_DIR / 'data'
 

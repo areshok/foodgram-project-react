@@ -11,7 +11,7 @@ from user.models import User
 load_dotenv()
 
 
-TEST_DATA_FOLDER = settings.DATA_FOLDER / 'test_data'
+TEST_DATA_FOLDER = settings.BASE_DIR.parent / 'data/test_data'
 
 DATA_FILES = {
     'tag': 'tags.csv',
@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print(settings.DATA_FOLDER)
         print(os.listdir(TEST_DATA_FOLDER))
-        user_admin()
+        #user_admin()
         users_load()
         load_tags()
         load_ingredient()

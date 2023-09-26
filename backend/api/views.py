@@ -8,10 +8,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .filters import IngredientFilter, ReceiptFilter
-from .functions import favorit_or_shopping_cart
+from .functions import favoritе_or_shopping_cart
 from .permissions import IsAuthorOrRedOnly
 from .serializers import (IngredientSerializers, ReceiptSerializers,
-                          TagSerializers)
+                          TagSerializers, ReceiptCreateSerialize)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -32,10 +32,14 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
-    serializer_class = ReceiptSerializers
     permission_classes = (IsAuthorOrRedOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ReceiptFilter
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return ReceiptSerializers
+        return ReceiptCreateSerialize
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -46,11 +50,10 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete'),
     )
     def favorite(self, request, pk):
-        return favorit_or_shopping_cart(
+        return favoritе_or_shopping_cart(
             request,
             pk,
             FavoritesReceipt,
-            'favorite',
         )
 
     @action(
@@ -59,11 +62,10 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         methods=('post', 'delete')
     )
     def shopping_cart(self, request, pk):
-        return favorit_or_shopping_cart(
+        return favoritе_or_shopping_cart(
             request,
             pk,
             ShoppingList,
-            'shopping_cart',
         )
 
     @action(
@@ -76,10 +78,9 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         if not ShoppingList.objects.filter(user=user).exists():
             return Response({'error': 'Список покупок пуст'},
                             status=status.HTTP_204_NO_CONTENT)
-
         shoping_list = list(
             IngredientReceipt.objects.filter(
-                receipt__sl_receipt__user=user).values(
+                receipt__shoppinglist_receipt__user=user).values(
                 'ingredient__name',
                 'ingredient__measurement_unit').annotate(
                 ingredient_amount=Sum('amount')))
@@ -88,11 +89,11 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         data += 'Список покупок \n'
         data += 'Ингридиент масса единица измерения \n'
 
-        for n, el in enumerate(shoping_list):
-            name = el['ingredient__name']
-            msu = el['ingredient__measurement_unit']
-            amount = el['ingredient_amount']
-            data += f'{n+1}. {name} {amount} {msu}. \n'
+        for number, element in enumerate(shoping_list):
+            name = element['ingredient__name']
+            msu = element['ingredient__measurement_unit']
+            amount = element['ingredient_amount']
+            data += f'{number+1}. {name} {amount} {msu}. \n'
 
         response = HttpResponse(
             data,

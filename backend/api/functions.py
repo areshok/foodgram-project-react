@@ -1,21 +1,16 @@
 from django.shortcuts import get_object_or_404
-from receipt.models import Receipt
 from rest_framework import status
 from rest_framework.response import Response
+
+from receipt.models import Receipt
 
 from .serializers import FavoriteReceiptSerializers
 
 
-def favorit_or_shopping_cart(request, pk, model, name_functions):
-    what_function = {
-        'favorite': 'избранное',
-        'shopping_cart': 'список покупок'
-    }
-
+def favoritе_or_shopping_cart(request, pk, model):
     message = {
-        'post': {'errors': ('Рецепт уже добавлен в'
-                            f'{what_function[name_functions]}')},
-        'del': {'errors': f'Рецепта нет в {what_function[name_functions]}'},
+        'post': {'errors': 'Рецепт уже добавлен в список'},
+        'del': {'errors': 'Рецепта нет в списке'},
     }
     receipt = get_object_or_404(Receipt, id=pk)
     check_receipt = model.objects.filter(
@@ -29,16 +24,16 @@ def favorit_or_shopping_cart(request, pk, model, name_functions):
                 message['post'],
                 status=status.HTTP_400_BAD_REQUEST
             )
-        else:
-            model.objects.create(
-                user=request.user,
-                receipt=receipt
-            )
-            serialize = FavoriteReceiptSerializers(receipt)
-            return Response(serialize.data, status=status.HTTP_201_CREATED)
+        model.objects.create(
+            user=request.user,
+            receipt=receipt
+        )
+        serialize = FavoriteReceiptSerializers(receipt)
+        return Response(serialize.data, status=status.HTTP_201_CREATED)
 
     if check_receipt:
-        model.objects.get(
+        get_object_or_404(
+            model,
             user=request.user,
             receipt=receipt
         ).delete()

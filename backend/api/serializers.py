@@ -18,6 +18,30 @@ class TagSerializers(serializers.ModelSerializer):
         )
 
 
+class TagReceiptSerializers(serializers.ModelSerializer):
+    id = ReadOnlyField(
+        source='tag.id'
+    )
+    name = ReadOnlyField(
+        source='tag.name'
+    )
+    color = ReadOnlyField(
+        source='tag.color',
+    )
+    slug = ReadOnlyField(
+        source='tag.slug'
+    )
+
+    class Meta:
+        model = TagReceipt
+        fields = (
+            'id',
+            'name',
+            'color',
+            'slug'
+        )
+
+
 class IngredientSerializers(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -59,7 +83,7 @@ class ReceiptSerializers(serializers.ModelSerializer):
     ingredients = IngredientDetailSerializer(
         read_only=True,
         many=True,
-        source="ir_receipt",
+        source="ingredientreceipt_receipt",
     )
     is_favorited = serializers.SerializerMethodField(
         required=False,
@@ -86,82 +110,6 @@ class ReceiptSerializers(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def create(self, validated_data):
-        receipt = Receipt.objects.create(**validated_data)
-        self.create_tag(receipt)
-        self.create_ingredients(receipt)
-        return receipt
-
-    def validate_ingredients(self):
-        value = self.initial_data.get('ingredients')
-        if value is None:
-            raise serializers.ValidationError(
-                {'ingredients': 'нет интгридиентов'}
-            )
-        if len(value) == 0:
-            raise serializers.ValidationError(
-                {'ingredients': 'нет интгридиентов'}
-            )
-        for element in value:
-            if type(element['id']) is not int:
-                raise serializers.ValidationError(
-                    {'ingredients': 'Не целочисленное число'}
-                )
-            if type(element['amount']) is not int:
-                raise serializers.ValidationError(
-                    {'ingredients': 'Не целочисленное число'}
-                )
-        id_list = []
-        for element in value:
-            id_list.append(element['id'])
-        if len(id_list) > len(set(id_list)):
-            raise serializers.ValidationError(
-                {'ingredients': 'Содержит дубликаты'}
-            )
-        return value
-
-    def validate_tags(self):
-        value = self.initial_data.get('tags')
-        if value is None:
-            raise serializers.ValidationError({'tags': 'нет тегов'})
-        for element in value:
-            if type(element) is not int:
-                raise serializers.ValidationError(
-                    {'tags': 'Не целочисленное число'}
-                )
-        if len(value) > len(set(value)):
-            raise serializers.ValidationError({'tags': 'Содержит дубликаты'})
-        return value
-
-    def create_ingredients(self, receipt):
-        ingridients = self.validate_ingredients()
-        objs = []
-        for element in ingridients:
-            ingredient = Ingredient.objects.get(id=element['id'])
-            amount = element['amount']
-            objs.append(IngredientReceipt(
-                receipt=receipt,
-                ingredient=ingredient,
-                amount=amount)
-            )
-        IngredientReceipt.objects.bulk_create(objs)
-
-    def create_tag(self, receipt):
-        tags = self.validate_tags()
-        objs = []
-        for tag in tags:
-            curent_tag = Tag.objects.get(id=tag)
-            objs.append(TagReceipt(tag=curent_tag, receipt=receipt))
-        TagReceipt.objects.bulk_create(objs)
-
-    def update(self, instance, validated_data):
-        super().update(instance, validated_data)
-        instance.t_receipt.all().delete()
-        self.create_tag(instance)
-        instance.ir_receipt.all().delete()
-        self.create_ingredients(instance)
-        return instance
-
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request.user.is_authenticated:
@@ -179,6 +127,115 @@ class ReceiptSerializers(serializers.ModelSerializer):
                     user=request.user, receipt=obj
                 ).exists())
         return False
+
+
+class IngridientReceiptCreate(serializers.Serializer):
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+
+    def to_internal_value(self, data):
+        id = data.get('id')
+        amount = data.get('amount')
+        return {
+            'id': id,
+            'amount': amount
+        }
+
+
+class ReceiptCreateSerialize(serializers.ModelSerializer):
+    image = Base64ImageField()
+    ingredients = IngridientReceiptCreate(
+        write_only=True,
+        many=True,
+    )
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+    )
+    author = UserSerializers(required=False)
+
+    class Meta:
+        model = Receipt
+        fields = (
+            'name',
+            'text',
+            'cooking_time',
+            'author',
+            'image',
+            'ingredients',
+            'tags',
+        )
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        receipt = Receipt.objects.create(**validated_data)
+        self.create_tag(receipt, tags)
+        self.create_ingredients(receipt, ingredients)
+        return receipt
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        super().update(instance, validated_data)
+        instance.tagreceipt_receipt.all().delete()
+        self.create_tag(instance, tags)
+        instance.ingredientreceipt_receipt.all().delete()
+        self.create_ingredients(instance, ingredients)
+        return instance
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return ReceiptSerializers(
+            instance,
+            context={'request': request}
+        ).data
+
+    def create_tag(self, receipt, tags):
+        objs = []
+        for tag in tags:
+            objs.append(TagReceipt(tag=tag, receipt=receipt))
+        TagReceipt.objects.bulk_create(objs)
+
+    def create_ingredients(self, receipt, ingredients):
+        objs = []
+        for element in ingredients:
+            ingredient = Ingredient.objects.get(id=element['id'])
+            amount = element['amount']
+            objs.append(IngredientReceipt(
+                receipt=receipt,
+                ingredient=ingredient,
+                amount=amount)
+            )
+        IngredientReceipt.objects.bulk_create(objs)
+
+    def validate_tags(self, value):
+        tags_id = []
+        for element in value:
+            tags_id.append(element.id)
+        if len(tags_id) > len(set(tags_id)):
+            raise serializers.ValidationError('дубликаты тегов')
+        return value
+
+    def validate_ingredients(self, value):
+        for element in value:
+            if type(element['id']) is not int:
+                raise serializers.ValidationError(
+                    'Не целочисленное число'
+                )
+            if type(element['amount']) is not int:
+                raise serializers.ValidationError(
+                    'Не целочисленное число'
+                )
+        id_list = []
+        for element in value:
+            id_list.append(element['id'])
+        if len(id_list) > len(set(id_list)):
+            raise serializers.ValidationError(
+                'Содержит дубликаты'
+            )
+
+        return value
 
 
 class ReceiptSubscribeSerializers(serializers.ModelSerializer):
