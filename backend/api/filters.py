@@ -31,10 +31,14 @@ class ReceiptFilter(FilterSet):
 
     def filter_is_favorited(self, queryset, name, value):
         if value and self.request.user.is_authenticated:
-            return queryset.filter(rf_receipt__user=self.request.user)
+            return queryset.filter(
+                favoritesreceipt_receipt__user=self.request.user
+            )
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         if value and self.request.user.is_authenticated:
-            return queryset.filter(sl_receipt__user=self.request.user)
+            return queryset.filter(
+                shoppinglist_receipt__user=self.request.user
+            )
         return queryset

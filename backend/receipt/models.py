@@ -52,14 +52,12 @@ class Receipt(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientReceipt',
-        #related_name_old='r_ingridient',
         related_name='receipt_ingridient',
         verbose_name='Ингридиенты',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        #related_name_old='r_user',
         related_name='receipt_user',
         verbose_name='Автор',
     )
@@ -103,7 +101,6 @@ class TagReceipt(models.Model):
     receipt = models.ForeignKey(
         Receipt,
         on_delete=models.CASCADE,
-        #related_name_old='t_receipt',
         related_name='tagreceipt_receipt',
         verbose_name='Рецепт',
     )
@@ -124,14 +121,12 @@ class IngredientReceipt(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        #related_name_old='ir_ingridient',
         related_name='ingredientreceipt_ingridient',
         verbose_name='Ингридиент'
     )
     receipt = models.ForeignKey(
         Receipt,
         on_delete=models.CASCADE,
-        #related_name_old='ir_receipt',
         related_name='ingredientreceipt_receipt',
         verbose_name='Рецепт',
     )
@@ -158,14 +153,12 @@ class FavoritesReceipt(models.Model):
     receipt = models.ForeignKey(
         Receipt,
         on_delete=models.CASCADE,
-        #related_name_old='rf_receipt',
         related_name='favoritesreceipt_receipt',
         verbose_name='Рецепт',
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        #related_name_old='fr_user',
         related_name='favoritesreceipt_user',
         verbose_name='Пользователь',
     )
@@ -183,14 +176,12 @@ class ShoppingList(models.Model):
     receipt = models.ForeignKey(
         Receipt,
         on_delete=models.CASCADE,
-        #related_name_old='sl_receipt',
         related_name='shoppinglist_receipt',
         verbose_name='Рецепт',
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        #related_name_old='sl_user',
         related_name='shoppinglist_user',
         verbose_name='Пользователь',
     )

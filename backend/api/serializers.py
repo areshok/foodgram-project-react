@@ -18,30 +18,6 @@ class TagSerializers(serializers.ModelSerializer):
         )
 
 
-class TagReceiptSerializers(serializers.ModelSerializer):
-    id = ReadOnlyField(
-        source='tag.id'
-    )
-    name = ReadOnlyField(
-        source='tag.name'
-    )
-    color = ReadOnlyField(
-        source='tag.color',
-    )
-    slug = ReadOnlyField(
-        source='tag.slug'
-    )
-
-    class Meta:
-        model = TagReceipt
-        fields = (
-            'id',
-            'name',
-            'color',
-            'slug'
-        )
-
-
 class IngredientSerializers(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -129,7 +105,7 @@ class ReceiptSerializers(serializers.ModelSerializer):
         return False
 
 
-class IngridientReceiptCreate(serializers.Serializer):
+class IngredientReceiptCreate(serializers.Serializer):
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
@@ -144,7 +120,7 @@ class IngridientReceiptCreate(serializers.Serializer):
 
 class ReceiptCreateSerialize(serializers.ModelSerializer):
     image = Base64ImageField()
-    ingredients = IngridientReceiptCreate(
+    ingredients = IngredientReceiptCreate(
         write_only=True,
         many=True,
     )
@@ -232,7 +208,7 @@ class ReceiptCreateSerialize(serializers.ModelSerializer):
             id_list.append(element['id'])
         if len(id_list) > len(set(id_list)):
             raise serializers.ValidationError(
-                'Содержит дубликаты'
+                'Содержит дубликаты ингредиентов'
             )
 
         return value

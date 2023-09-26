@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print(settings.DATA_FOLDER)
         print(os.listdir(TEST_DATA_FOLDER))
-        #user_admin()
+        user_admin()
         users_load()
         load_tags()
         load_ingredient()

@@ -1,17 +1,18 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
-                            Receipt, ShoppingList, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
+                            Receipt, ShoppingList, Tag)
+
 from .filters import IngredientFilter, ReceiptFilter
 from .functions import favoritе_or_shopping_cart
 from .permissions import IsAuthorOrRedOnly
-from .serializers import (IngredientSerializers, ReceiptSerializers,
-                          TagSerializers, ReceiptCreateSerialize)
+from .serializers import (IngredientSerializers, ReceiptCreateSerialize,
+                          ReceiptSerializers, TagSerializers)
 
 
 class TagViewSet(viewsets.ModelViewSet):
