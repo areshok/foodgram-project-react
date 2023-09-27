@@ -4,7 +4,7 @@ from .models import (FavoritesReceipt, Ingredient, IngredientReceipt, Receipt,
                      ShoppingList, Tag, TagReceipt)
 
 
-class IngridientInstanceInline(admin.TabularInline):
+class IngredientInstanceInline(admin.TabularInline):
     model = IngredientReceipt
 
 
@@ -28,7 +28,7 @@ class ReceiptAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'author', 'count_added')
     list_filter = ('name', 'author', 'tags',)
     search_fields = ('name', 'author', 'tags',)
-    inlines = [IngridientInstanceInline, TagInstanceInline]
+    inlines = [IngredientInstanceInline, TagInstanceInline]
 
     def count_added(self, obj):
         return obj.rf_receipt.count()

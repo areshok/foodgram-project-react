@@ -1,9 +1,9 @@
-from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
-                            Receipt, ShoppingList, Tag, TagReceipt)
 from rest_framework import serializers
 from rest_framework.serializers import ReadOnlyField
-from user.serializers import UserSerializers
 
+from user.serializers import UserSerializers
+from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
+                            Receipt, ShoppingList, Tag, TagReceipt)
 from .fields import Base64ImageField
 
 
@@ -176,12 +176,10 @@ class ReceiptCreateSerialize(serializers.ModelSerializer):
     def create_ingredients(self, receipt, ingredients):
         objs = []
         for element in ingredients:
-            ingredient = Ingredient.objects.get(id=element['id'])
-            amount = element['amount']
             objs.append(IngredientReceipt(
                 receipt=receipt,
-                ingredient=ingredient,
-                amount=amount)
+                ingredient_id=element['id'],
+                amount=element['amount'])
             )
         IngredientReceipt.objects.bulk_create(objs)
 

@@ -27,7 +27,7 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        verbose_name='Название ингридиента',
+        verbose_name='Название ингредиента',
         max_length=200,
     )
     measurement_unit = models.CharField(
@@ -36,8 +36,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиенты'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиенты'
+        verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
         return self.name
@@ -52,8 +52,8 @@ class Receipt(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientReceipt',
-        related_name='receipt_ingridient',
-        verbose_name='Ингридиенты',
+        related_name='receipt_ingredient',
+        verbose_name='Ингредиенты',
     )
     author = models.ForeignKey(
         User,
@@ -121,8 +121,8 @@ class IngredientReceipt(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredientreceipt_ingridient',
-        verbose_name='Ингридиент'
+        related_name='ingredientreceipt_ingredient',
+        verbose_name='Ингредиент'
     )
     receipt = models.ForeignKey(
         Receipt,
