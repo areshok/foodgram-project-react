@@ -31,7 +31,7 @@ class ReceiptAdmin(admin.ModelAdmin):
     inlines = [IngredientInstanceInline, TagInstanceInline]
 
     def count_added(self, obj):
-        return obj.rf_receipt.count()
+        return obj.favoritesreceipt_receipt.count()
 
 
 admin.site.register(Tag)
