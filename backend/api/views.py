@@ -7,7 +7,6 @@ from rest_framework.response import Response
 
 from receipt.models import (FavoritesReceipt, Ingredient, IngredientReceipt,
                             Receipt, ShoppingList, Tag)
-
 from .filters import IngredientFilter, ReceiptFilter
 from .functions import favoritе_or_shopping_cart
 from .permissions import IsAuthorOrRedOnly

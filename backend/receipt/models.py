@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from user.models import User
 
 
@@ -106,8 +107,8 @@ class TagReceipt(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Теги рецептев'
-        verbose_name_plural = 'Теги рецептев'
+        verbose_name = 'Теги рецептов'
+        verbose_name_plural = 'Теги рецептов'
         constraints = [
             models.UniqueConstraint(
                 fields=['tag', 'receipt'], name='unique_tagreceipt')
@@ -136,8 +137,8 @@ class IngredientReceipt(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Игридиенты рецептев'
-        verbose_name_plural = 'Игридиенты рецептев'
+        verbose_name = 'Ингредиенты рецептов'
+        verbose_name_plural = 'Ингредиенты рецептов'
         constraints = [
             models.UniqueConstraint(
                 fields=['ingredient', 'receipt'],
