@@ -193,13 +193,13 @@ class ReceiptCreateSerialize(serializers.ModelSerializer):
 
     def validate_ingredients(self, value):
         for element in value:
-            if type(element['id']) is not int:
+            if not isinstance(element['id'], int):
                 raise serializers.ValidationError(
-                    'Не целочисленное число'
+                    ' id не целочисленное число'
                 )
-            if type(element['amount']) is not int:
+            if not isinstance(element['amount'], int):
                 raise serializers.ValidationError(
-                    'Не целочисленное число'
+                    'amount не целочисленное число'
                 )
         id_list = []
         for element in value:
