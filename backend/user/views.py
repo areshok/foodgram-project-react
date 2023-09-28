@@ -2,10 +2,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from api.pagination import ReceiptPagination
 from user.models import Subscription, User
 from .serializers import (PasswordChangeSerialize, SubscriptionSerializers,
                           TokenSerializers, UserSerializers)
@@ -46,7 +46,7 @@ class TokenViewSet(viewsets.ViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializers
-    pagination_class = LimitOffsetPagination
+    pagination_class = ReceiptPagination
 
     @action(
         detail=False,
