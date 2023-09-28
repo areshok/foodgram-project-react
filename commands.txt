@@ -30,3 +30,4 @@ sudo docker rmi -f $(sudo docker images -aq)
 
 # показывает сколько осталось свободного места на диске
 df -h
+
