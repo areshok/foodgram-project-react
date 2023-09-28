@@ -12,6 +12,7 @@ from .functions import favoritе_or_shopping_cart
 from .permissions import IsAuthorOrRedOnly
 from .serializers import (IngredientSerializers, ReceiptCreateSerialize,
                           ReceiptSerializers, TagSerializers)
+from .pagination import ReceiptPagination
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -35,6 +36,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrRedOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ReceiptFilter
+    pagination_class = ReceiptPagination
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
