@@ -19,7 +19,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Теги'
+        verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
     def __str__(self):
@@ -37,7 +37,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингредиенты'
+        verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
@@ -85,7 +85,7 @@ class Receipt(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Рецепты'
+        verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ['-pub_date']
 
@@ -107,7 +107,7 @@ class TagReceipt(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Теги рецептов'
+        verbose_name = 'Теги рецепта'
         verbose_name_plural = 'Теги рецептов'
         constraints = [
             models.UniqueConstraint(
@@ -137,7 +137,7 @@ class IngredientReceipt(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингредиенты рецептов'
+        verbose_name = 'Ингредиенты рецепта'
         verbose_name_plural = 'Ингредиенты рецептов'
         constraints = [
             models.UniqueConstraint(
@@ -165,7 +165,7 @@ class FavoritesReceipt(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Избранные рецепты'
+        verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
             models.UniqueConstraint(

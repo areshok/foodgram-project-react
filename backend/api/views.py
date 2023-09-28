@@ -87,7 +87,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 
         data = ''
         data += 'Список покупок \n'
-        data += 'Ингридиент масса единица измерения \n'
+        data += 'Ингредиент масса единица измерения \n'
 
         for number, element in enumerate(shoping_list):
             name = element['ingredient__name']
