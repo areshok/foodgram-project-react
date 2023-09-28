@@ -48,7 +48,6 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializers
     pagination_class = ReceiptPagination
-    permission_classes = (IsAdminModeratorOwnerOrReadOnly, )
 
     @action(
         detail=False,
