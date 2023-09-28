@@ -112,6 +112,7 @@ class SubscriptionSerializers(serializers.ModelSerializer):
         ).exists()
 
     def get_recipes(self, obj):
-        receipts = obj.author.receipt_user.all()
-        serializer = ReceiptSubscribeSerializers(receipts, many=True)
-        return serializer.data
+        queryset = obj.author.receipt_user.all()
+        page = self.paginate_queryset(queryset)
+        serializer = ReceiptSubscribeSerializers(page, many=True)
+        return self.get_paginated_response(serializer.data)
