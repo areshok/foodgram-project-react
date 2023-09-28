@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from api.permissions import IsAdminModeratorOwnerOrReadOnly
 from api.pagination import ReceiptPagination
 from user.models import Subscription, User
 from .serializers import (PasswordChangeSerialize, SubscriptionSerializers,
