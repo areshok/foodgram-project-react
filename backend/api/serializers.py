@@ -200,7 +200,11 @@ class ReceiptCreateSerialize(serializers.ModelSerializer):
                     ' id не целочисленное число'
                 )
             try:
-                int(element['amount'])
+                amount = int(element['amount'])
+                if amount < 0:
+                    raise serializers.ValidationError(
+                        'amount отрицательное число'
+                    )
             except Exception:
                 raise serializers.ValidationError(
                     'amount не целочисленное число'
