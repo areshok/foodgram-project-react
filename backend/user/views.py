@@ -102,7 +102,7 @@ class UserViewSet(viewsets.ModelViewSet):
             page,
             many=True,
             context={'user': user,
-                     'recipes_limit': recipes_limit,
+                     'recipes_limit': int(recipes_limit),
                      }
         )
         return self.get_paginated_response(serializer.data)
