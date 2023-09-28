@@ -1,0 +1,32 @@
+# создание контейнеров для платформы amd64
+docker buildx build --platform=linux/amd64 -t areshok/foodgram_backend .
+docker buildx build --platform=linux/amd64 -t areshok/foodgram_frontend .
+docker buildx build --platform=linux/amd64 -t areshok/foodgram_gateway .
+
+
+# отправка обновлений контейнеров на docker hub
+docker push areshok/foodgram_frontend
+docker push areshok/foodgram_backend
+docker push areshok/foodgram_gateway 
+
+# получение обновлений контейнеров и перезапуск их
+sudo docker compose -f docker-compose.production.yml pull
+sudo docker compose -f docker-compose.production.yml down
+sudo docker compose -f docker-compose.production.yml up -d
+
+
+# перемещает файлы frontend в контейнер nginx
+sudo docker exec  foodgram-nginx-1 cp -rT /static_frontend/build/ /usr/share/nginx/html/
+
+
+# Создает админа, и добавляет ингридиенты 
+sudo docker exec foodgram-backend-1 python manage.py data
+ 
+# Создает тестовые рецепты, для диплома
+sudo docker exec foodgram-backend-1 python manage.py recipes_diplom
+
+# удаление всех docker image 
+sudo docker rmi -f $(sudo docker images -aq)
+
+# показывает сколько осталось свободного места на диске
+df -h
