@@ -112,7 +112,7 @@ class SubscriptionSerializers(serializers.ModelSerializer):
         ).exists()
 
     def get_recipes(self, obj):
-
-        receipts = obj.author.receipt_user.all()
+        recipes_limit = self.context.get('recipes_limit')
+        receipts = obj.author.receipt_user.all()[0:recipes_limit]
         serializer = ReceiptSubscribeSerializers(receipts, many=True)
         return serializer.data

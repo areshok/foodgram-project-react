@@ -95,13 +95,15 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def subscriptions(self, request):
         user = request.user
-        print(request.query_params.get('recipes_limit'))
+        recipes_limit = request.query_params.get('recipes_limit')
         queryset = user.followers.all()
         page = self.paginate_queryset(queryset)
         serializer = SubscriptionSerializers(
             page,
             many=True,
-            context={'user': user}
+            context={'user': user,
+                     'recipes_limit': recipes_limit,
+                     }
         )
         return self.get_paginated_response(serializer.data)
 
